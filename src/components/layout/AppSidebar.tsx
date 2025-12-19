@@ -27,20 +27,22 @@ import {
   Shield, 
   Info,
   Moon,
+  Sun,
   Wifi,
   WifiOff,
   Globe,
   ChevronLeft,
-  ChevronRight,
-  Bot
+  ChevronRight
 } from 'lucide-react';
 
 interface AppSidebarProps {
-  activePanel: 'dashboard' | 'settings' | 'admin' | 'about' | 'nocti';
-  onPanelChange: (panel: 'dashboard' | 'settings' | 'admin' | 'about' | 'nocti') => void;
+  activePanel: 'dashboard' | 'settings' | 'admin' | 'about';
+  onPanelChange: (panel: 'dashboard' | 'settings' | 'admin' | 'about') => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
-export function AppSidebar({ activePanel, onPanelChange }: AppSidebarProps) {
+export function AppSidebar({ activePanel, onPanelChange, isDarkMode, onToggleDarkMode }: AppSidebarProps) {
   const {
     viewMode,
     setViewMode,
@@ -179,28 +181,23 @@ export function AppSidebar({ activePanel, onPanelChange }: AppSidebarProps) {
             {!collapsed && <span>About</span>}
           </button>
 
-          <Separator className="my-4" />
-
-          {!collapsed && (
-            <span className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              AI Assistant
-            </span>
-          )}
-
-          <button
-            onClick={() => onPanelChange('nocti')}
-            className={cn(
-              "nav-item w-full mt-2",
-              activePanel === 'nocti' && "active"
-            )}
-          >
-            <Bot className="h-5 w-5 shrink-0" />
-            {!collapsed && <span>Nocti AI</span>}
-          </button>
         </nav>
 
         {/* Bottom Section */}
         <div className="p-3 border-t border-sidebar-border space-y-2">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={onToggleDarkMode}
+            className="nav-item w-full"
+          >
+            {isDarkMode ? (
+              <Sun className="h-5 w-5 shrink-0" />
+            ) : (
+              <Moon className="h-5 w-5 shrink-0" />
+            )}
+            {!collapsed && <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>}
+          </button>
+
           {/* Language Toggle */}
           <button
             onClick={() => setLanguage(getNextLanguage(language))}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppProvider, useApp } from '@/context/AppContext';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { KPIPanel } from '@/components/kpi/KPIPanel';
@@ -9,14 +9,41 @@ import { StatsPanel } from '@/components/stats/StatsPanel';
 import { AdminControls } from '@/components/admin/AdminControls';
 import { ActivityLog } from '@/components/activity/ActivityLog';
 import { NoctiAIPanel } from '@/components/nocti/NoctiAIPanel';
+import { NoctiAIButton } from '@/components/nocti/NoctiAIButton';
 
 function DashboardContent() {
   const { viewMode } = useApp();
-  const [activePanel, setActivePanel] = useState<'dashboard' | 'settings' | 'admin' | 'about' | 'nocti'>('dashboard');
+  const [activePanel, setActivePanel] = useState<'dashboard' | 'settings' | 'admin' | 'about'>('dashboard');
+  const [isNoctiOpen, setIsNoctiOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' || 
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+  const toggleNocti = () => setIsNoctiOpen(!isNoctiOpen);
 
   return (
     <div className="flex min-h-screen w-full bg-background">
-      <AppSidebar activePanel={activePanel} onPanelChange={setActivePanel} />
+      <AppSidebar 
+        activePanel={activePanel} 
+        onPanelChange={setActivePanel}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={toggleDarkMode}
+      />
       
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
@@ -66,10 +93,13 @@ function DashboardContent() {
         </div>
       </main>
 
-      {/* Right Panel - Nocti AI */}
-      {activePanel === 'nocti' && (
-        <aside className="w-[400px] h-screen shrink-0">
-          <NoctiAIPanel onClose={() => setActivePanel('dashboard')} />
+      {/* Nocti AI Floating Button */}
+      <NoctiAIButton isOpen={isNoctiOpen} onClick={toggleNocti} />
+
+      {/* Right Panel - Nocti AI (sliding) */}
+      {isNoctiOpen && (
+        <aside className="fixed top-0 right-0 h-screen w-[400px] z-40 animate-slide-in-right">
+          <NoctiAIPanel onClose={toggleNocti} />
         </aside>
       )}
     </div>
