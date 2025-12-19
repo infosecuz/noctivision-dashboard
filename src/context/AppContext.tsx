@@ -174,10 +174,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsLoadingResults(true);
     try {
       const data = await getResults(filters, sort, MAX_RESULTS_CACHE);
-      setResults(data);
+      // Ensure data is always an array
+      setResults(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch results:', error);
       addActivityLog({ type: 'error', message: `Failed to fetch results: ${error}` });
+      setResults([]); // Reset to empty array on error
     } finally {
       setIsLoadingResults(false);
     }
