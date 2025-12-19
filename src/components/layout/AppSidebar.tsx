@@ -31,12 +31,13 @@ import {
   WifiOff,
   Globe,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Bot
 } from 'lucide-react';
 
 interface AppSidebarProps {
-  activePanel: 'dashboard' | 'settings' | 'admin' | 'about';
-  onPanelChange: (panel: 'dashboard' | 'settings' | 'admin' | 'about') => void;
+  activePanel: 'dashboard' | 'settings' | 'admin' | 'about' | 'nocti';
+  onPanelChange: (panel: 'dashboard' | 'settings' | 'admin' | 'about' | 'nocti') => void;
 }
 
 export function AppSidebar({ activePanel, onPanelChange }: AppSidebarProps) {
@@ -176,6 +177,25 @@ export function AppSidebar({ activePanel, onPanelChange }: AppSidebarProps) {
           >
             <Info className="h-5 w-5 shrink-0" />
             {!collapsed && <span>About</span>}
+          </button>
+
+          <Separator className="my-4" />
+
+          {!collapsed && (
+            <span className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              AI Assistant
+            </span>
+          )}
+
+          <button
+            onClick={() => onPanelChange('nocti')}
+            className={cn(
+              "nav-item w-full mt-2",
+              activePanel === 'nocti' && "active"
+            )}
+          >
+            <Bot className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>Nocti AI</span>}
           </button>
         </nav>
 
