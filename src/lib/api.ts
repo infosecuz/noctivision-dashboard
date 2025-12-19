@@ -129,7 +129,15 @@ export async function getResults(
     date_to: filters.dateTo,
   });
   
-  return apiFetch<ResultRow[]>(`/results${params}`);
+  const response = await apiFetch<ResultRow[] | { results?: ResultRow[] }>(`/results${params}`);
+  // Handle both array response and object with results property
+  if (Array.isArray(response)) {
+    return response;
+  }
+  if (response && Array.isArray(response.results)) {
+    return response.results;
+  }
+  return [];
 }
 
 export async function exportResults(

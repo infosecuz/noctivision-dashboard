@@ -31,15 +31,26 @@ const WINDOW_OPTIONS = [
 ];
 
 interface SparklineProps {
-  data: number[];
+  data?: number[];
   color?: string;
   height?: number;
 }
 
-function Sparkline({ data, color = 'hsl(var(--primary))', height = 40 }: SparklineProps) {
-  const max = Math.max(...data, 1);
-  const points = data.map((value, i) => {
-    const x = (i / (data.length - 1 || 1)) * 100;
+function Sparkline({ data = [], color = 'hsl(var(--primary))', height = 40 }: SparklineProps) {
+  // Guard against non-array data
+  const safeData = Array.isArray(data) ? data : [];
+  
+  if (safeData.length === 0) {
+    return (
+      <svg viewBox={`0 0 100 ${height}`} className="w-full" preserveAspectRatio="none">
+        <line x1="0" y1={height / 2} x2="100" y2={height / 2} stroke="hsl(var(--muted))" strokeWidth="1" strokeDasharray="4" />
+      </svg>
+    );
+  }
+
+  const max = Math.max(...safeData, 1);
+  const points = safeData.map((value, i) => {
+    const x = (i / (safeData.length - 1 || 1)) * 100;
     const y = height - (value / max) * height;
     return `${x},${y}`;
   }).join(' ');
@@ -192,7 +203,7 @@ export function StatsPanel() {
               <span className="text-xs text-muted-foreground">All</span>
               <span className="font-mono text-xs">{stats.total}</span>
             </div>
-            <Sparkline data={stats.series.points} />
+            <Sparkline data={stats.series?.points} />
           </div>
           
           <div className="grid grid-cols-2 gap-2">
@@ -201,21 +212,21 @@ export function StatsPanel() {
                 <Badge variant="outline" className="status-valid text-xs">Valid</Badge>
                 <span className="font-mono text-xs">{stats.by_status.valid || 0}</span>
               </div>
-              <Sparkline data={stats.series.valid} color="hsl(var(--status-valid))" height={30} />
+              <Sparkline data={stats.series?.valid} color="hsl(var(--status-valid))" height={30} />
             </div>
             <div className="bg-muted/30 rounded-lg p-2 border border-border/50">
               <div className="flex items-center justify-between mb-1">
                 <Badge variant="outline" className="status-error text-xs">Error</Badge>
                 <span className="font-mono text-xs">{stats.by_status.error || 0}</span>
               </div>
-              <Sparkline data={stats.series.errors} color="hsl(var(--status-error))" height={30} />
+              <Sparkline data={stats.series?.errors} color="hsl(var(--status-error))" height={30} />
             </div>
           </div>
         </div>
       </div>
 
       {/* Top error domains */}
-      {stats.top_error_domains.length > 0 && (
+      {Array.isArray(stats.top_error_domains) && stats.top_error_domains.length > 0 && (
         <div>
           <label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
             <AlertTriangle className="h-3.5 w-3.5" />
@@ -224,7 +235,7 @@ export function StatsPanel() {
           <div className="space-y-1">
             {stats.top_error_domains.slice(0, 5).map((item, idx) => (
               <div 
-                key={item.domain}
+                key={item.domain || idx}
                 className="flex items-center justify-between py-1.5 px-2 rounded bg-muted/30 border border-border/50"
               >
                 <span className="text-xs font-mono truncate max-w-[150px]">{item.domain}</span>
